@@ -1,6 +1,8 @@
 /*!
 * BootstrapAutoComplete v1.0.0
-* Copyright 2024 Darrell Percey - Licensed under MIT 
+* https://github.com/darrellwp/bootstrapautocomplete/
+* Copyright 2024 Darrell Percey - Licensed under MIT
+* https://github.com/darrellwp/bootstrapautocomplete/blob/main/LICENSE
 */
 
 const defaults = {
