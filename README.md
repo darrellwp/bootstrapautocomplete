@@ -2,7 +2,7 @@
 Auto complete tool that styles the results in Bootstrap v4/v5.
 
 ## Requirements
-## [Bootstrap] (https://getbootstrap.com/)
+Bootstrap (https://getbootstrap.com/)
 
 ## HTML
 ```html
