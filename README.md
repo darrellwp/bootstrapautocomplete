@@ -27,8 +27,12 @@ let autoComplete = new BootstrapAutoComplete(document.getElementById('autocomple
 // Call with configs set
 let autoComplete = new BootstrapAutoComplete(document.getElementById('autocomplete'), {
     serverProcessing: true,
-    dataSource: () => { 
-        return ['hello', 'goodbye', 'seeya', 'boom','super', 'doops', 'scoop'] 
+    dataSource: async (value, size) => { 
+        let response = await fetch(`/getData?value=${value}&size=${size}`);
+        if(!response.ok){
+            return new Array();
+        }
+        return await response.json();
     },
     minType: 2,
     maxDisplaySize: 2
@@ -37,7 +41,9 @@ let autoComplete = new BootstrapAutoComplete(document.getElementById('autocomple
 
 | Config  | Default | Description |
 | ------------- | ------------- | ------------- |
-| serverProcessing  | false  | Calls the dataSource call every change event on the input |
+| serverProcessing  | false  | Determines whether the dataSource is called every input change or one time only |
 | maxDisplaySize | 10  | Maximum size of matched items displayed |
-| dataSource | REQUIRED | function(currentInputValue, maxSize) that preloads or calls each change event based on serverProcessing|
+| dataSource | REQUIRED | function(currentInputValue, maxSize) return [] of results|
 | minType| 1 | Amount of characters required to fire an autocomplete search |
+| overflow | false | true - the list will scroll, false - no scrolling | 
+| maxHeight| 1 | maximum height of the menu when overflow is true |

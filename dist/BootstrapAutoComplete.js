@@ -1,5 +1,5 @@
 /*!
-* BootstrapAutoComplete v1.0.0
+* BootstrapAutoComplete v1.1.0
 * https://github.com/darrellwp/bootstrapautocomplete/
 * Copyright 2024 Darrell Percey - Licensed under MIT
 * https://github.com/darrellwp/bootstrapautocomplete/blob/main/LICENSE
@@ -21,6 +21,14 @@ const defaults = {
     minType: {
         value: 1,
         type: 'number'
+    },
+    overflow: {
+        value: false,
+        type: 'boolean'
+    },
+    maxHeight:{
+        value: 200,
+        type: 'number'
     }
 }
 
@@ -33,16 +41,16 @@ class BootstrapAutoComplete{
         this.element = element;
         this.data = [];
         this.filteredData = [];
-        this.menu = this.buildSelectMenu();
         this.menuIsShown = false;
         this.setConfig(config);
+        this.menu = this.buildSelectMenu();
 
         // Ensure dataSource is provided
         if (this.config.dataSource == undefined) { throw new Error('No dataSource was provided')}
 
         // Preload data here if serverProcessing is off
         if(!this.config.serverProcessing){
-            this.data = this.config.dataSource().map((entry) => entry.toString());
+            this.data = [...this.config.dataSource()].map((entry) => entry.toString());
         }
 
         this.addInputEvents();
@@ -78,14 +86,23 @@ class BootstrapAutoComplete{
         completeMenu.className = 'list-group position-absolute top-100 fade';
         completeMenu.style.width = `calc(100% - ${parentComputed.paddingLeft} - ${parentComputed.paddingRight}`;
 
+        if(this.config.overflow){
+            completeMenu.classList.add('overflow-auto');
+            completeMenu.style.maxHeight = `${this.config.maxHeight}px`;
+        }
+
         this.element.parentElement.append(completeMenu);  
         
         return completeMenu;
     }
 
+    /**
+     * Adds event listeners
+     */
     addInputEvents(){
         var _this = this;
 
+        // Keydown event for enter, up, and down
         this.element.addEventListener('keydown', function(e){
             if(_this.menuIsShown){
                 switch(e.key){
@@ -94,11 +111,11 @@ class BootstrapAutoComplete{
                         e.preventDefault();
                         break;
                     case 'ArrowUp':
-                        _this.setActivePrevious();
+                        _this.setActiveItem('previousElementSibling');
                         e.preventDefault();
                         break;
                     case 'ArrowDown':
-                        _this.setActiveNext();
+                        _this.setActiveItem('nextElementSibling');
                         e.preventDefault();
                         break;
                 }
@@ -107,30 +124,34 @@ class BootstrapAutoComplete{
 
         // Change event for pulling results
         this.element.addEventListener('input', async function(){
-            if(this.value.length >= _this.config.minType){
-                if(_this.config.serverProcessing){
-                    _this.data = await _this.config.dataSource(this.value, _this.config.maxDisplaySize);
-                }
-
-                _this.filteredData = _this.data.filter((entry) => entry.includes(this.value));
-
-                _this.menu.innerHTML = '';
-                // Toggle visibility of menu, add results
-                if(_this.filteredData.length > 0){
-                    _this.filteredData.slice(0,_this.config.maxDisplaySize).forEach((entry) => {
-                        _this.menu.append(_this.generateMenuItem(entry, this.value));
-                    })
-                    _this.menu.append()
-
-                    _this.show();
-                } 
-                else{
-                    _this.hide();
-                }
+            if(this.value.length < _this.config.minType){
+                _this.hide();
+                return;
             }
+
+            let cachedValue = this.value;
+
+            // Pull data from source
+            if(_this.config.serverProcessing){
+                _this.data = await _this.config.dataSource(this.value, _this.config.maxDisplaySize);
+                if(this.value != cachedValue) return;
+            }
+
+            // Ensure the data set is filtered down and list is reset
+            _this.filteredData = _this.data.filter((entry) => entry.toLowerCase().includes(this.value.toLowerCase()));
+            _this.menu.innerHTML = '';
+
+            // Toggle visibility of menu, add results
+            if(_this.filteredData.length > 0){
+                var re = new RegExp(this.value, 'gi');
+                _this.filteredData.slice(0,_this.config.maxDisplaySize).forEach((entry) => {
+                    _this.menu.append(_this.generateMenuItem(entry, this.value, re));
+                })
+                _this.show();
+            } 
             else{
                 _this.hide();
-            }
+            }  
         });
 
         // Hide when focus out of the box
@@ -140,15 +161,21 @@ class BootstrapAutoComplete{
 
     }
 
-    generateMenuItem(entry, filterValue){
+    /**
+     * Generates a list item using bootstrap's list-group-item
+     * @param {*} entry 
+     * @param {*} filterValue 
+     * @param {*} regExp 
+     * @returns 
+     */
+    generateMenuItem(entry, filterValue, regExp){
         let listItem = document.createElement('li');
         listItem.className = 'list-group-item list-group-item-action px-3 py-1';
         listItem.dataset['value'] = entry;
-        listItem.innerHTML = entry.replace(filterValue, `<strong>${filterValue}</strong>`);
+        listItem.innerHTML = entry.replaceAll(regExp, `<strong>$&</strong>`);
 
         var _this = this;
         listItem.addEventListener('mousedown', function(e){
-            e.preventDefault();
             e.stopPropagation();
             this.classList.add('active');
             _this.element.value = this.dataset['value'];
@@ -158,34 +185,23 @@ class BootstrapAutoComplete{
         return listItem;
     }
 
-    setActiveNext(){
+    setActiveItem(nextProp){
         if(this.menu.querySelectorAll('.list-group-item').length == 0) return;
 
         let activeItem = this.menu.querySelector('.active');
-        let nextItem = this.menu.querySelector('.list-group-item:first-child');
+        let nextItem = this.menu.querySelector(`.list-group-item:${(nextProp == 'nextElementSibling' ? 'first-child' : 'last-child')}`);
 
         if(activeItem){
             activeItem.classList.remove('active');
-            let nextActive = activeItem.nextElementSibling;
+            let nextActive = activeItem[nextProp];
             nextItem = nextActive || nextItem;
         }
 
         nextItem.classList.add('active');
-    }
 
-    setActivePrevious(){
-        if(this.menu.querySelectorAll('.list-group-item').length == 0) return;
-
-        let activeItem = this.menu.querySelector('.active');
-        let previousItem = this.menu.querySelector('.list-group-item:last-child');
-
-        if(activeItem){
-            activeItem.classList.remove('active');
-            let previousActive = activeItem.previousElementSibling;
-            previousItem = previousActive || previousItem;
+        if(this.config.overflow){
+            nextItem.scrollIntoView(true);
         }
-
-        previousItem.classList.add('active');
     }
 
     selectEntry(){
@@ -203,8 +219,8 @@ class BootstrapAutoComplete{
     }
 
     hide(){
-        this.menuIsShown = false;
-        this.menu.classList.remove('d-none');
-        this.menu.innerHTML = '';
+        this.menuIsShown = false;    
+        this.menu.classList.remove('show');
+        setTimeout(() => { this.menu.innerHTML = ''}, 100);
     }
 }
