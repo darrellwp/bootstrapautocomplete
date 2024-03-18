@@ -38,11 +38,11 @@ let autoComplete = new BootstrapAutoComplete(document.getElementById('autocomple
 });
 ```
 
-| Config  | Default | Description |
+| Config  | Default | Type | Description |
 | ------------- | ------------- | ------------- |
-| maxDisplaySize | 10  | Maximum size of matched items displayed |
-| data | array | Provides the preloaded data to the autocompleter. This will be overwritten if dataSource is provided |
-| dataSource | function | function(currentInputValue, maxSize) return [] of results. Use for XHR request to fill list.|
-| minType| 1 | Amount of characters required to fire an autocomplete search |
-| overflow | false | true - the list will scroll, false - no scrolling | 
-| maxHeight| 1 | maximum height of the menu when overflow is true |
+| maxDisplaySize | 10  | number | Maximum size of matched items displayed. |
+| data | [] | array | Provides the preloaded data to the autocompleter. This will be overwritten if dataSource is provided. |
+| dataSource | null | function | (currentInputValue, maxSize) => { return [] of results }. Use for XHR request to fill list.|
+| minType| 1 | number | Amount of characters required to fire an autocomplete search. |
+| overflow | false | boolean | true - the list will scroll, false - no scrolling. | 
+| maxHeight| 1 | number | maximum height of the menu in pixels when overflow is true. |
