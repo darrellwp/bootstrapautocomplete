@@ -1,18 +1,18 @@
 /*!
-* BootstrapAutoComplete v1.1.0
+* BootstrapAutoComplete v1.2.0
 * https://github.com/darrellwp/bootstrapautocomplete/
 * Copyright 2024 Darrell Percey - Licensed under MIT
 * https://github.com/darrellwp/bootstrapautocomplete/blob/main/LICENSE
 */
 
 const defaults = {
-    serverProcessing: {
-        value: false,
-        type: 'boolean',
-    },
     maxDisplaySize: {
         value: 10,
         type: 'number'
+    },
+    data:{
+        value: [],
+        type: 'object'
     },
     dataSource: {
         value: undefined,
@@ -39,25 +39,21 @@ class BootstrapAutoComplete{
 
         this.config = {};
         this.element = element;
-        this.data = [];
         this.filteredData = [];
+        this.data = config?.data || [];
         this.menuIsShown = false;
         this.setConfig(config);
         this.menu = this.buildSelectMenu();
-
-        // Ensure dataSource is provided
-        if (this.config.dataSource == undefined) { throw new Error('No dataSource was provided')}
-
-        // Preload data here if serverProcessing is off
-        if(!this.config.serverProcessing){
-            this.data = [...this.config.dataSource()].map((entry) => entry.toString());
-        }
 
         this.addInputEvents();
 
         element.bootstrapAutoComplete = this;
     }
 
+    /**
+     * Parse the config object passed into the constructor - ensure the type is correct
+     * @param {object} config 
+     */
     setConfig(config){
         Object.keys(defaults).forEach((key) => {
             if(config && config.hasOwnProperty(key)){
@@ -124,15 +120,12 @@ class BootstrapAutoComplete{
 
         // Change event for pulling results
         this.element.addEventListener('input', async function(){
-            if(this.value.length < _this.config.minType){
-                _this.hide();
-                return;
-            }
+            if (_this.config.dataSource == undefined && _this.config.data.length == 0) { throw new Error('No dataSource or data was provided')}
+            if(this.value.length < _this.config.minType) return _this.hide();
 
             let cachedValue = this.value;
 
-            // Pull data from source
-            if(_this.config.serverProcessing){
+           if(_this.config.dataSource){
                 _this.data = await _this.config.dataSource(this.value, _this.config.maxDisplaySize);
                 if(this.value != cachedValue) return;
             }
@@ -163,12 +156,11 @@ class BootstrapAutoComplete{
 
     /**
      * Generates a list item using bootstrap's list-group-item
-     * @param {*} entry 
-     * @param {*} filterValue 
-     * @param {*} regExp 
-     * @returns 
+     * @param {string} entry Entry value that is used to create a list item
+     * @param {RegExp} regExp Input value in //gi
+     * @returns <li>
      */
-    generateMenuItem(entry, filterValue, regExp){
+    generateMenuItem(entry, regExp){
         let listItem = document.createElement('li');
         listItem.className = 'list-group-item list-group-item-action px-3 py-1';
         listItem.dataset['value'] = entry;
@@ -185,6 +177,11 @@ class BootstrapAutoComplete{
         return listItem;
     }
 
+    /**
+     * Sets the next active item when using the key.ArrowUp or the key.ArrowDown
+     * @param {string} nextProp String value - nextElementSibling || previousElementSibling
+     * @returns null
+     */
     setActiveItem(nextProp){
         if(this.menu.querySelectorAll('.list-group-item').length == 0) return;
 
@@ -200,10 +197,14 @@ class BootstrapAutoComplete{
         nextItem.classList.add('active');
 
         if(this.config.overflow){
-            nextItem.scrollIntoView(true);
+            nextItem.scrollIntoView();
         }
     }
 
+    /**
+     * Handler for clicking on a list item or hitting enter on an active item
+     * @returns null
+     */
     selectEntry(){
         let activeItem = this.menu.querySelector('.active');
 
@@ -213,11 +214,17 @@ class BootstrapAutoComplete{
         this.hide(); 
     }
 
+    /**
+     * Shows the list
+     */
     show(){
         this.menuIsShown = true;
         this.menu.classList.add('show');
     }
 
+    /**
+     * Hides the list
+     */
     hide(){
         this.menuIsShown = false;    
         this.menu.classList.remove('show');

@@ -15,16 +15,15 @@ Bootstrap (https://getbootstrap.com/)
 
 
 ```javascript
-// Provide the element and the data call
+// Provide the element and some data
+let data = ['hello', 'goodbye', 'seeya', 'boom','super', 'doops', 'scoop'] ;
 let autoComplete = new BootstrapAutoComplete(document.getElementById('autocomplete'), {
-    dataSource: () => { 
-        return ['hello', 'goodbye', 'seeya', 'boom','super', 'doops', 'scoop'] 
-    } 
+    data: data 
 });
 ```
 
 ```javascript
-// Call with configs set
+// Use of dataSoruce to call data on change events
 let autoComplete = new BootstrapAutoComplete(document.getElementById('autocomplete'), {
     serverProcessing: true,
     dataSource: async (value, size) => { 
@@ -41,9 +40,9 @@ let autoComplete = new BootstrapAutoComplete(document.getElementById('autocomple
 
 | Config  | Default | Description |
 | ------------- | ------------- | ------------- |
-| serverProcessing  | false  | Determines whether the dataSource is called every input change or one time only |
 | maxDisplaySize | 10  | Maximum size of matched items displayed |
-| dataSource | REQUIRED | function(currentInputValue, maxSize) return [] of results|
+| data | array | Provides the preloaded data to the autocompleter. This will be overwritten if dataSource is provided |
+| dataSource | function | function(currentInputValue, maxSize) return [] of results. Use for XHR request to fill list.|
 | minType| 1 | Amount of characters required to fire an autocomplete search |
 | overflow | false | true - the list will scroll, false - no scrolling | 
 | maxHeight| 1 | maximum height of the menu when overflow is true |
