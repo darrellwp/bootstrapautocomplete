@@ -39,7 +39,7 @@ let autoComplete = new BootstrapAutoComplete(document.getElementById('autocomple
 ```
 
 | Config  | Default | Type | Description |
-| ------------- | ------------- | ------------- |
+| ------------- | ------------- |------------- | ------------- |
 | maxDisplaySize | 10  | number | Maximum size of matched items displayed. |
 | data | [] | array | Provides the preloaded data to the autocompleter. This will be overwritten if dataSource is provided. |
 | dataSource | null | function | (currentInputValue, maxSize) => { return [] of results }. Use for XHR request to fill list.|
