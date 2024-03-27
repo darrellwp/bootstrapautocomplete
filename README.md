@@ -17,32 +17,40 @@ Bootstrap (https://getbootstrap.com/)
 ```javascript
 // Provide the element and some data
 let data = ['hello', 'goodbye', 'seeya', 'boom','super', 'doops', 'scoop'] ;
+
+//Pass in the element and optinal configurations
 let autoComplete = new BootstrapAutoComplete(document.getElementById('autocomplete'), {
-    data: data 
+    data: data,
+    filterType: 'startsWith',
+    overflow: true,
+    maxHeight: 350,
+    maxDisplaySize: 25
 });
 ```
 
 ```javascript
-// Use of dataSoruce to call data on change events
+// Use of dataSource via fetch - Value/size are provided to help reduce results sent back before filtering
 let autoComplete = new BootstrapAutoComplete(document.getElementById('autocomplete'), {
-    serverProcessing: true,
     dataSource: async (value, size) => { 
         let response = await fetch(`/getData?value=${value}&size=${size}`);
+
         if(!response.ok){
             return new Array();
         }
+
+        // Return [] or null
         return await response.json();
-    },
-    minType: 2,
-    maxDisplaySize: 2
+    }
 });
 ```
+
 
 | Config  | Default | Type | Description |
 | ------------- | ------------- |------------- | ------------- |
 | maxDisplaySize | 10  | number | Maximum size of matched items displayed. |
 | data | [] | array | Provides the preloaded data to the autocompleter. This will be overwritten if dataSource is provided. |
-| dataSource | null | function | (currentInputValue, maxSize) => { return [] of results }. Use for XHR request to fill list.|
+| dataSource | null | function | (currentInputValue, maxSize) => { return [] or null }. This will trigger on change events.|
 | minType| 1 | number | Amount of characters required to fire an autocomplete search. |
 | overflow | false | boolean | true - the list will scroll, false - no scrolling. | 
-| maxHeight| 1 | number | maximum height of the menu in pixels when overflow is true. |
+| maxHeight| 200 | number | Maximum height of the menu in pixels when overflow is true. |
+| filterType| 'includes' | string | Filters based on string function. Must be 'includes', 'startsWith' or 'endsWith' |

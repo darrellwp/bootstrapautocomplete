@@ -1,5 +1,5 @@
 /*!
-* BootstrapAutoComplete v1.2.0
+* BootstrapAutoComplete v1.3.0
 * https://github.com/darrellwp/bootstrapautocomplete/
 * Copyright 2024 Darrell Percey - Licensed under MIT
 * https://github.com/darrellwp/bootstrapautocomplete/blob/main/LICENSE
@@ -10,7 +10,7 @@ const defaults = {
         value: 10,
         type: 'number'
     },
-    data:{
+    data: {
         value: [],
         type: 'object'
     },
@@ -26,9 +26,13 @@ const defaults = {
         value: false,
         type: 'boolean'
     },
-    maxHeight:{
+    maxHeight: {
         value: 200,
         type: 'number'
+    },
+    filterType: {
+        value: 'includes',
+        type: 'string'
     }
 }
 
@@ -58,7 +62,17 @@ class BootstrapAutoComplete{
         Object.keys(defaults).forEach((key) => {
             if(config && config.hasOwnProperty(key)){
                 if(typeof config[key] == defaults[key].type){
-                    this.config[key] = config[key];
+                    if(key == 'filterType'){
+                        if(['includes', 'startsWith', 'endsWith'].some((x) => x == config[key])){
+                            this.config[key] = config[key];
+                        } 
+                        else{
+                            console.error(`${key} must be type ${defaults[key].type} and be includes, startsWith, or endsWith. Used default values.`);
+                        }
+                    } 
+                    else{
+                        this.config[key] = config[key];
+                    }
                 }
                 else{
                     console.error(`${key} must be type ${defaults[key].type}. Used default values.`)
@@ -127,32 +141,59 @@ class BootstrapAutoComplete{
 
            if(_this.config.dataSource){
                 _this.data = await _this.config.dataSource(this.value, _this.config.maxDisplaySize);
+
+                if(_this.data != null && !Array.isArray(_this.data)){
+                    console.error(`The data returned was type ${typeof _this.data}. Check that the dataSoruce is returning and array of strings. Data set to []`);
+                    _this.data = [];   
+                }
+
                 if(this.value != cachedValue) return;
             }
 
-            // Ensure the data set is filtered down and list is reset
-            _this.filteredData = _this.data.filter((entry) => entry.toLowerCase().includes(this.value.toLowerCase()));
-            _this.menu.innerHTML = '';
+            if(_this.data != null){
+                // Ensure the data set is filtered down and list is reset
+                _this.filteredData = _this.data.filter((entry) => entry.toLowerCase()[_this.config.filterType](this.value.toLowerCase()));
+                _this.menu.innerHTML = '';
 
-            // Toggle visibility of menu, add results
-            if(_this.filteredData.length > 0){
-                var re = new RegExp(this.value, 'gi');
-                _this.filteredData.slice(0,_this.config.maxDisplaySize).forEach((entry) => {
-                    _this.menu.append(_this.generateMenuItem(entry, this.value, re));
-                })
-                _this.show();
-            } 
-            else{
-                _this.hide();
-            }  
+                // Toggle visibility of menu, add results
+                if(_this.filteredData.length > 0){
+                    let re = _this.buildRegex(this.value, _this.config.filterType);
+                    _this.filteredData.slice(0,_this.config.maxDisplaySize).forEach((entry) => {
+                        _this.menu.append(_this.generateMenuItem(entry, re));
+                    })
+                    _this.show();
+                } 
+                else{
+                    _this.hide();
+                }  
+            }
         });
 
         // Hide when focus out of the box
         this.element.addEventListener('focusout', function(e){
             _this.hide();
         });
-
     }
+
+    buildRegex(value, type){
+        let searchValue = '';
+        let modifier = 'i';
+
+        switch(type){
+            case 'startsWith':
+                searchValue = `^${value}`
+                break;
+            case 'endsWith':
+                searchValue = `${value}$`
+                break
+            default:
+                searchValue = value;
+                modifier += 'g';
+        }
+
+        return new RegExp(searchValue, modifier);
+    }
+
 
     /**
      * Generates a list item using bootstrap's list-group-item
@@ -164,7 +205,7 @@ class BootstrapAutoComplete{
         let listItem = document.createElement('li');
         listItem.className = 'list-group-item list-group-item-action px-3 py-1';
         listItem.dataset['value'] = entry;
-        listItem.innerHTML = entry.replaceAll(regExp, `<strong>$&</strong>`);
+        listItem.innerHTML = entry.replace(regExp, `<strong>$&</strong>`);
 
         var _this = this;
         listItem.addEventListener('mousedown', function(e){
