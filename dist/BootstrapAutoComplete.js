@@ -1,5 +1,5 @@
 /*!
-* BootstrapAutoComplete v1.3.1
+* BootstrapAutoComplete v1.3.2
 * https://github.com/darrellwp/bootstrapautocomplete/
 * Copyright 2024 Darrell Percey - Licensed under MIT
 * https://github.com/darrellwp/bootstrapautocomplete/blob/main/LICENSE
@@ -18,7 +18,7 @@ const defaults = {
         value: undefined,
         type: 'function'
     },
-    minType: {
+    minimumTypeAhead: {
         value: 1,
         type: 'number'
     },
@@ -33,6 +33,10 @@ const defaults = {
     filterType: {
         value: 'includes',
         type: 'string'
+    },
+    zIndex: {
+        value: 10,
+        type: 'number' 
     }
 }
 
@@ -96,6 +100,7 @@ class BootstrapAutoComplete{
         completeMenu.className = 'list-group position-absolute fade';
         completeMenu.style.width = `calc(100% - ${parentComputed.paddingLeft} - ${parentComputed.paddingRight}`;
         completeMenu.style.top = "100%";
+        completeMenu.style.zIndex = this.config.zIndex;
 
         if(this.config.overflow){
             completeMenu.classList.add('overflow-auto');
@@ -136,7 +141,7 @@ class BootstrapAutoComplete{
         // Change event for pulling results
         this.element.addEventListener('input', async function(){
             if (_this.config.dataSource == undefined && _this.config.data.length == 0) { throw new Error('No dataSource or data was provided')}
-            if(this.value.length < _this.config.minType) return _this.hide();
+            if(this.value.length < _this.config.minimumTypeAhead) return _this.hide();
 
             let cachedValue = this.value;
 
@@ -239,7 +244,7 @@ class BootstrapAutoComplete{
         nextItem.classList.add('active');
 
         if(this.config.overflow){
-            nextItem.scrollIntoView();
+            nextItem.scrollIntoView({block: 'nearest', inline:'nearest'});
         }
     }
 
