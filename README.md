@@ -50,7 +50,8 @@ let autoComplete = new BootstrapAutoComplete(document.getElementById('autocomple
 | maxDisplaySize | 10  | number | Maximum size of matched items displayed. |
 | data | [] | array | Provides the preloaded data to the autocompleter. This will be overwritten if dataSource is provided. |
 | dataSource | null | function | (currentInputValue, maxSize) => { return [] or null }. This will trigger on change events.|
-| minType| 1 | number | Amount of characters required to fire an autocomplete search. |
+| minimumTypeAhead | 1 | number | Amount of characters required to fire an autocomplete search. |
 | overflow | false | boolean | true - the list will scroll, false - no scrolling. | 
 | maxHeight| 200 | number | Maximum height of the menu in pixels when overflow is true. |
+| zIndex| 10 | number | z-index value set on the auto complete list. |
 | filterType| 'includes' | string | Filters based on string function. Must be 'includes', 'startsWith' or 'endsWith' |
