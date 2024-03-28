@@ -1,5 +1,5 @@
 /*!
-* BootstrapAutoComplete v1.3.0
+* BootstrapAutoComplete v1.3.1
 * https://github.com/darrellwp/bootstrapautocomplete/
 * Copyright 2024 Darrell Percey - Licensed under MIT
 * https://github.com/darrellwp/bootstrapautocomplete/blob/main/LICENSE
@@ -93,8 +93,9 @@ class BootstrapAutoComplete{
     buildSelectMenu(){
         let parentComputed = window.getComputedStyle(this.element.parentElement, null);
         let completeMenu = document.createElement('ul');
-        completeMenu.className = 'list-group position-absolute top-100 fade';
+        completeMenu.className = 'list-group position-absolute fade';
         completeMenu.style.width = `calc(100% - ${parentComputed.paddingLeft} - ${parentComputed.paddingRight}`;
+        completeMenu.style.top = "100%";
 
         if(this.config.overflow){
             completeMenu.classList.add('overflow-auto');
