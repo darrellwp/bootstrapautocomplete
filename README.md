@@ -55,3 +55,4 @@ let autoComplete = new BootstrapAutoComplete(document.getElementById('autocomple
 | maxHeight| 200 | number | Maximum height of the menu in pixels when overflow is true. |
 | zIndex| 10 | number | z-index value set on the auto complete list. |
 | filterType| 'includes' | string | Filters based on string function. Must be 'includes', 'startsWith' or 'endsWith' |
+| eventCallback| undefined | function | (value) => { event handler for keydown on enter. Input will be set to selected value first}|
