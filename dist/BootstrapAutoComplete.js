@@ -1,5 +1,5 @@
 /*!
-* BootstrapAutoComplete v1.3.2
+* BootstrapAutoComplete v1.4.0
 * https://github.com/darrellwp/bootstrapautocomplete/
 * Copyright 2024 Darrell Percey - Licensed under MIT
 * https://github.com/darrellwp/bootstrapautocomplete/blob/main/LICENSE
@@ -15,6 +15,10 @@ const defaults = {
         type: 'object'
     },
     dataSource: {
+        value: undefined,
+        type: 'function'
+    },
+    enterCallback:{
         value: undefined,
         type: 'function'
     },
@@ -136,6 +140,10 @@ class BootstrapAutoComplete{
                         break;
                 }
             }
+
+            if(_this.config.enterCallback && e.key == 'Enter'){
+                _this.config.enterCallback(_this.element.value);
+            }
         });
 
         // Change event for pulling results
@@ -255,9 +263,10 @@ class BootstrapAutoComplete{
     selectEntry(){
         let activeItem = this.menu.querySelector('.active');
 
-        if(this.menu.querySelectorAll('.list-group-item').length == 0 || !activeItem) return;
+        if(this.menu.querySelectorAll('.list-group-item').length > 0 && activeItem){
+            this.element.value = activeItem.dataset['value'];
+        }
 
-        this.element.value = activeItem.dataset['value'];
         this.hide(); 
     }
 
