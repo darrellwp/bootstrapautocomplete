@@ -224,6 +224,7 @@ class BootstrapAutoComplete{
         listItem.className = 'list-group-item list-group-item-action px-3 py-1';
         listItem.dataset['value'] = entry;
         listItem.innerHTML = entry.replace(regExp, `<strong>$&</strong>`);
+        listItem.style.cursor = 'default';
 
         var _this = this;
         listItem.addEventListener('mousedown', function(e){
