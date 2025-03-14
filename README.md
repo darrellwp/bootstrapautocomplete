@@ -56,3 +56,4 @@ let autoComplete = new BootstrapAutoComplete(document.getElementById('autocomple
 | zIndex| 10 | number | z-index value set on the auto complete list. |
 | filterType| 'includes' | string | Filters based on string function. Must be 'includes', 'startsWith' or 'endsWith' |
 | eventCallback| undefined | function | (value) => { event handler for keydown on enter. Input will be set to selected value first}|
+| clickCallback| undefined | function | (value) => { event handler for clicking on a list item. Input will be set to selected value}|

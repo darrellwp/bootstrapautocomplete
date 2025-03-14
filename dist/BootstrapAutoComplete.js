@@ -1,7 +1,7 @@
 /*!
-* BootstrapAutoComplete v1.4.0
+* BootstrapAutoComplete v1.5.0
 * https://github.com/darrellwp/bootstrapautocomplete/
-* Copyright 2024 Darrell Percey - Licensed under MIT
+* Copyright 2025 Darrell Percey - Licensed under MIT
 * https://github.com/darrellwp/bootstrapautocomplete/blob/main/LICENSE
 */
 
@@ -18,7 +18,11 @@ const defaults = {
         value: undefined,
         type: 'function'
     },
-    enterCallback:{
+    enterCallback: {
+        value: undefined,
+        type: 'function'
+    },
+    clickCallback: {
         value: undefined,
         type: 'function'
     },
@@ -220,6 +224,7 @@ class BootstrapAutoComplete{
         listItem.className = 'list-group-item list-group-item-action px-3 py-1';
         listItem.dataset['value'] = entry;
         listItem.innerHTML = entry.replace(regExp, `<strong>$&</strong>`);
+        listItem.style.cursor = 'default';
 
         var _this = this;
         listItem.addEventListener('mousedown', function(e){
@@ -227,6 +232,10 @@ class BootstrapAutoComplete{
             this.classList.add('active');
             _this.element.value = this.dataset['value'];
             _this.hide();
+
+            if(_this.config.clickCallback) {
+                _this.config.clickCallback(_this.element.value);
+            }
         })
 
         return listItem;
